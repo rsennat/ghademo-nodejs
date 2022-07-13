@@ -47,8 +47,9 @@ jobs:
       - name: npm install, build, and test
         run: |
              npm install
+             npm run clean
              npm run build --if-present
-             npm run test --if-present
+             npm run test --if-present && npm run junitxml
         
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -62,7 +63,7 @@ jobs:
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
           job-name: 'Build'
-          xml-report-filename: './reports/'
+          xml-report-filename: 'reports/'
         
      
       - name: ServiceNow DevOps Register Artifact
@@ -111,7 +112,7 @@ jobs:
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
           job-name: 'Deploy'
-          change-request: '{"setCloseCode":"true","attributes":{"cmdb_ci":"13a5ab8ddba899101fc2dad1f3961921","reason": "Software upgrade","short_description":"Automated Software Deployment","category":"Documentation","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","assigned_to":"6816f79cc0a8016401c5a33be04be441","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
+          change-request: '{"setCloseCode":"true","attributes":{"short_description":"Application deployment for samples-dev","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
           interval: '30'
           timeout: '3600'
   

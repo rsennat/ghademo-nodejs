@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "clean": "rm -Rf reports",
+    "junitxml": "find reports -type f -name \"*.xml\" -exec sed -i'' -e 's/tests=\"/skipped=\"0\" tests=\"/g' {} + && rm -f reports/*.xml-e",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false"
   },
