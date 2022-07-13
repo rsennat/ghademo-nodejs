@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<testsuite name="Chrome Headless 103.0.5060.114 (Windows 10)" package="" timestamp="2022-07-13T13:42:42" id="0" hostname="WAP7XgRMnYNd9N5" skipped="0" tests="3" errors="0" failures="0" time="0.097">
+  <properties>
+    <property name="browser.fullName" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/103.0.5060.114 Safari/537.36"/>
+  </properties>
+  <testcase name="AppComponent should render title" time="0.084" classname="AppComponent"/>
+  <testcase name="AppComponent should have as title 'samples-app'" time="0.008" classname="AppComponent"/>
+  <testcase name="AppComponent should create the app" time="0.005" classname="AppComponent"/>
+  <system-out>
+    <![CDATA[Chrome Headless 103.0.5060.114 (Windows 10) ERROR: 'NG0304: 'app-web-ui' is not a known element:
+1. If 'app-web-ui' is an Angular component, then verify that it is part of this module.
+2. If 'app-web-ui' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.'
+,Chrome Headless 103.0.5060.114 (Windows 10) LOG: 'Development!'
+,Chrome Headless 103.0.5060.114 (Windows 10) ERROR: 'NG0304: 'app-web-ui' is not a known element:
+1. If 'app-web-ui' is an Angular component, then verify that it is part of this module.
+2. If 'app-web-ui' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.'
+,Chrome Headless 103.0.5060.114 (Windows 10) ERROR: 'NG0304: 'app-web-ui' is not a known element:
+1. If 'app-web-ui' is an Angular component, then verify that it is part of this module.
+2. If 'app-web-ui' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.'
+
+]]>
+  </system-out>
+  <system-err/>
+</testsuite>
