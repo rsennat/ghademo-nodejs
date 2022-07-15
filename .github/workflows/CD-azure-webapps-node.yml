@@ -26,7 +26,13 @@ env:
   AZURE_WEBAPP_NAME: js-gh-actions    # set this to your application's name
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '14.x'                # set this to the node version to use
-
+  GITHUB_TOKEN: ${{ secrets.GHP_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_ORG_KEY: ${{ secrets.SONAR_ORG_KEY }}
+  
+  
 permissions:
   contents: read
 
@@ -64,64 +70,103 @@ jobs:
           context-github: ${{ toJSON(github) }}
           job-name: 'Build'
           xml-report-filename: 'reports/'
-        
-     
-      - name: ServiceNow DevOps Register Artifact
-        uses: ServiceNow/servicenow-devops-register-artifact@v1.34.2
-        with:
-          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
-          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: 'Build'
-          # List of Artifacts to be registered
-          artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: node-app
-          path: release.zip
-
-  deploy:
+    
+  runSonarQube:
+    name: 'Run SonarQube' 
     runs-on: ubuntu-latest
-    name: Deploy
     needs: build
-    
     steps:
-      - name: ServiceNow DevOps Register Package
-        uses: ServiceNow/servicenow-devops-register-package@v1.34.2
-        with:
+    - uses: actions/checkout@v3
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+        
+    - name: sonarqube-scanner install.
+      run: npm install -g sonarqube-scanner
+        
+    - name: SonarCloud Scan
+      run: sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.organization=$SONAR_ORG_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.branch.name=master
+      
+    - name: Store Scan Tests Results
+      shell: bash
+      run : echo "Store Scan Tests Results in ServiceNow"
+      
+    - name: ServiceNow DevOps Sonar Scan Results
+      uses: ServiceNow/servicenow-devops-sonar@v1.34.2
+      with:
           devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
           devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          job-name: 'Run SonarQube'
           context-github: ${{ toJSON(github) }}
-          job-name: 'Deploy'
-          artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
-          package-name: 'release-all-${{ github.run_number }}.zip'
+          sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
+          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
+ 
+ 
+  registerArtifact:
+    name: 'Register Artifact'
+    runs-on: ubuntu-latest
+    needs: runSonarQube
+    steps:
+    - name: Register Artifact
+      shell: bash
+      run : echo "Register Artifact to ServiceNow"
+        
+    - name: ServiceNow Register Artifact
+      uses: ServiceNow/servicenow-devops-register-artifact@v1.34.2
+      with:
+        devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+        devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+        instance-url: ${{ secrets.SN_INSTANCE_URL }}
+        tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name:  'Register Artifact'
+        artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+          
+ 
+  registerPackage:
+    name: 'Register Package'
+    runs-on: ubuntu-latest
+    needs: registerArtifact
+    steps:
+    - name: Register Package to ServiceNow
+      shell: bash
+      run : echo "Register Package to ServiceNow"
+      
+    - name: ServiceNow Register Package
+      uses: ServiceNow/servicenow-devops-register-package@v1.34.2
+      with:
+        devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+        devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+        instance-url: ${{ secrets.SN_INSTANCE_URL }}
+        tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: 'Register Package'
+        artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+        package-name: 'release-all-${{ github.run_number }}.zip'
 
 
-      - name: ServiceNow DevOps Change Automation
-        uses: ServiceNow/servicenow-devops-change@v1.34.2
-        with:
-          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
-          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: 'Deploy'
-          change-request: '{"setCloseCode":"true","attributes":{"short_description":"Application deployment for samples-dev","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
-          interval: '30'
-          timeout: '3600'
+  approveChangeRequest:
+    name: 'Approve Change Request'
+    runs-on: ubuntu-latest
+    needs: registerPackage
+    steps:
+    - name: Approve Change Request in ServiceNow
+      shell: bash
+      run : echo "Approve Change Request in ServiceNow"
+      
+    - name: ServiceNow Change
+      uses: ServiceNow/servicenow-devops-change@v1.34.2
+      with:
+        devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+        devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+        instance-url: ${{ secrets.SN_INSTANCE_URL }}
+        tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: 'Approve Change Request'
+        change-request: '{"setCloseCode":"false","attributes":{"short_description":"Application deployment for samples-dev","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
+        interval: '100'
+        timeout: '3600'
   
-  
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: node-app
-    
-    
-      - name: unzip artifact for deployment
-        run: unzip release.zip
+ 
