@@ -1,0 +1,144 @@
+
+name: Deploy_nodejs_environment_standard
+
+on:
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: js-gh-actions    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '14.x'                # set this to the node version to use
+  GITHUB_TOKEN: ${{ secrets.GHP_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_ORG_KEY: ${{ secrets.SONAR_ORG_KEY }}
+  
+  
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: npm install, build, and test
+        run: |
+             npm install
+             npm run clean
+             npm run build --if-present
+             npm run test --if-present && npm run junitxml
+        
+    
+      - name: ServiceNow DevOps Unit Test Results
+        uses: ServiceNow/servicenow-devops-test-report@v1.34.2
+        with:
+          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Build'
+          xml-report-filename: 'reports/'
+ 
+ 
+  runSonarQube:
+    name: 'Run SonarQube' 
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+        
+    - name: sonarqube-scanner install.
+      run: npm install -g sonarqube-scanner
+        
+    - name: SonarCloud Scan
+      run: sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.organization=$SONAR_ORG_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.branch.name=master
+      
+    - name: Store Scan Tests Results
+      shell: bash
+      run : echo "Store Scan Tests Results in ServiceNow"
+      
+    - name: ServiceNow DevOps Sonar Scan Results
+      uses: ServiceNow/servicenow-devops-sonar@v1.34.2
+      with:
+          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          job-name: 'Run SonarQube'
+          context-github: ${{ toJSON(github) }}
+          sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
+          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
+ 
+ 
+  registerArtifact:
+    name: 'Register Artifact'
+    runs-on: ubuntu-latest
+    needs: runSonarQube
+    steps:
+    - name: Register Artifact
+      shell: bash
+      run : echo "Register Artifact to ServiceNow"
+        
+    - name: ServiceNow Register Artifact
+      uses: ServiceNow/servicenow-devops-register-artifact@v1.34.2
+      with:
+        devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+        devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+        instance-url: ${{ secrets.SN_INSTANCE_URL }}
+        tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name:  'Register Artifact'
+        artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+          
+ 
+  registerPackage:
+    name: 'Register Package'
+    runs-on: ubuntu-latest
+    needs: registerArtifact
+    steps:
+    - name: Register Package to ServiceNow
+      shell: bash
+      run : echo "Register Package to ServiceNow"
+      
+    - name: ServiceNow Register Package
+      uses: ServiceNow/servicenow-devops-register-package@v1.34.2
+      with:
+        devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+        devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+        instance-url: ${{ secrets.SN_INSTANCE_URL }}
+        tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+        context-github: ${{ toJSON(github) }}
+        job-name: 'Register Package'
+        artifacts: '[{"name": "com:release.zip","version": "1.${{ github.run_number }}.0","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+        package-name: 'release-all-${{ github.run_number }}.zip'
+
+
+  approveChangeRequest:
+    name: 'Approve Change Request'
+    runs-on: ubuntu-latest
+    needs: registerPackage
+    environment: prod
+    steps:
+    - name: Approve Change Request in ServiceNow
+      shell: bash
+      run : echo "Approve Change Request in ServiceNow"
+      
+    - name: Trigger Deployment
+      shell: bash
+      run : echo "Deployment Completed"
+      
