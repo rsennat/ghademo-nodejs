@@ -37,4 +37,4 @@ jobs:
       - name: Wait for few secs
         uses: jakejarvis/wait-action@master
         with:
-          time: '120s'
+          time: '300s'
