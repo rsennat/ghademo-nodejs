@@ -20,6 +20,7 @@
 name: Deploy_nodejs_Azure_AppService
 
 on:
+  push:
   workflow_dispatch:
 
 env:
