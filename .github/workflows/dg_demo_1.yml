@@ -1,4 +1,4 @@
-name: dg_demo
+name: dg_demo_1
 
 on:
   workflow_dispatch:
