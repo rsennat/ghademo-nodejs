@@ -1,0 +1,17 @@
+name: dg_demo
+
+on:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '14.x'
+
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: demo
+    steps:
+      - name: Run deployment scripts
+        run: echo Completed Deployment.
