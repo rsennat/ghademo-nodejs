@@ -6,35 +6,35 @@ name: CI_nodejs
 on:
   workflow_dispatch:
 
+env:
+  NODE_VERSION: '14.x'
+  
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: samples-app/package-lock.json
 
-      - name: CI
-        run: npm ci
+    - name: npm install.
+      run: npm install
+      working-directory: ./results
 
-      - name: Build
-        run: npm run build --if-present
-
-      - name: Test
-        run: CI=true npm test
-        
-      - name: Wait for few secs
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '300s'
+    - name: npm build.
+      run: npm run clean && npm run build --if-present
+      working-directory: ./results
+    
+    - name: npm test.
+      run: npm run test --if-present
+      working-directory: ./results
+      
+    - name: convert to junit xml
+      run: npm run junitxml
+      working-directory: ./results
