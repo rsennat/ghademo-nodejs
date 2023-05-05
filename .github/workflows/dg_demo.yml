@@ -26,23 +26,18 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: samples-app/package-lock.json
 
     - name: npm install.
       run: npm install
-      working-directory: ./samples-app
 
     - name: npm build.
       run: npm run clean && npm run build --if-present
-      working-directory: ./samples-app
     
     - name: npm test.
       run: npm run test --if-present
-      working-directory: ./samples-app
       
     - name: convert to junit xml
       run: npm run junitxml
-      working-directory: ./samples-app
     
     - name: ServiceNow DevOps Unit Test Results
       uses: ServiceNow/servicenow-devops-test-report@v1.34.2
@@ -53,7 +48,7 @@ jobs:
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
         job-name: 'Build'
-        xml-report-filename: './samples-app/reports/'
+        xml-report-filename: 'reports/'
 
   
   runSonarQube:
@@ -68,7 +63,6 @@ jobs:
         
     - name: sonarqube-scanner install.
       run: npm install -g sonarqube-scanner
-      working-directory: ./samples-app
         
     - name: SonarCloud Scan
       run: sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.organization=$SONAR_ORG_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.branch.name=master
