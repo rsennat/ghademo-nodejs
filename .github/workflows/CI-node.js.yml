@@ -21,7 +21,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: samples-app/package-lock.json
+        cache-dependency-path: results/package-lock.json
 
     - name: npm install.
       run: npm install
