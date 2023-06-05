@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:     
       - name: ServiceNow DevOps Change Attributes
-        uses: velivalab/servicenow-devops-change@deploymentgate
+        uses: velivalab/servicenow-devops-change@depgate
         with:
           devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
           devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
