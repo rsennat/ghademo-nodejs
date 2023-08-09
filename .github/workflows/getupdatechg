@@ -1,0 +1,58 @@
+name: validate get and update chg actions
+on: 
+  workflow_dispatch:
+
+jobs:
+  deployment_uat:
+    name: Prepare-UAT-Deployment
+    runs-on: ubuntu-latest   
+    steps:     
+      - name: ServiceNow Change Approval
+        uses: ServiceNow/servicenow-devops-change@v2.0.0
+        id: create
+        with:
+          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Prepare-UAT-Deployment'
+          change-request: '{"setCloseCode":"true","attributes":{"short_description":"Automated Software Deployment","assignment_group":"a715cd759f2002002920bde8132e7018","description":"Automated Software Deployment.","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
+          interval: '100'
+          timeout: '3600'
+  
+  post_implementation_uat:
+     name: Post Implementation UAT GET
+     runs-on: ubuntu-latest
+     needs: deployment_uat
+     outputs:
+         changeRequestNumber: ${{ steps.get.outputs.change-request-number }}
+     steps:
+       - name: ServiceNow Get Change
+         uses: ServiceNow/servicenow-devops-get-change@v2.0.0
+         id: get
+         with:
+           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+           instance-url: ${{ secrets.SN_INSTANCE_URL }}
+           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+           context-github: ${{ toJSON(github) }}
+           change-details: '{"build_number":"","pipeline_name":"","stage_name":"Prepare-UAT-Deployment"}'
+
+       - name: Output of post_implementation_uat_get
+         run: echo "change-request-number = ${{ steps.get.outputs.change-request-number }}" >> $GITHUB_OUTPUT    
+
+       - name: Servicenow Update Change Details
+         uses: ServiceNow/servicenow-devops-update-change@v2.0.0
+         id: update
+         with:
+           change-request-number: ${{ steps.get.outputs.change-request-number }}
+           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+           instance-url: ${{ secrets.SN_INSTANCE_URL }}
+           context-github: ${{ toJSON(github) }}
+           change-request-details: '{"close_code":"successful", "close_notes":"Deployment to PROD was successful"}'
+
+#change-request-details: '{"close_code":"successful", "close_notes":"Deployment to PROD was successful","state":"3"}'
+#change-request-number: '${{needs.post_implementation_uat.outputs.changeRequestNumber}}'           
+#change-request-details: '{"state":"3","close_code":"successful", "close_notes":"Deployment to PROD was successful"}'
