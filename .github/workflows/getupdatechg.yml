@@ -11,8 +11,7 @@ jobs:
         uses: ServiceNow/servicenow-devops-change@v2.0.0
         id: create
         with:
-          #devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
-          #devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+          node-version: '16'
           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
           instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
@@ -33,6 +32,7 @@ jobs:
          uses: ServiceNow/servicenow-devops-get-change@v2.0.0
          id: get
          with:
+           node-version: '16'
            devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
            instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
            tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
@@ -46,13 +46,10 @@ jobs:
          uses: ServiceNow/servicenow-devops-update-change@v2.0.0
          id: update
          with:
+           node-version: '16'
            change-request-number: ${{ steps.get.outputs.change-request-number }}
            devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
            tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
            instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
            context-github: ${{ toJSON(github) }}
            change-request-details: '{"close_code":"successful", "close_notes":"Deployment to PROD was successful"}'
-
-#change-request-details: '{"close_code":"successful", "close_notes":"Deployment to PROD was successful","state":"3"}'
-#change-request-number: '${{needs.post_implementation_uat.outputs.changeRequestNumber}}'           
-#change-request-details: '{"state":"3","close_code":"successful", "close_notes":"Deployment to PROD was successful"}'
