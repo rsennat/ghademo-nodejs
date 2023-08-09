@@ -6,7 +6,7 @@ jobs:
   deployment_uat:
     name: Prepare-UAT-Deployment
     runs-on: ubuntu-latest   
-    steps:     
+    steps:
       - name: ServiceNow Change Approval
         uses: ServiceNow/servicenow-devops-change@v2.0.0
         id: create
