@@ -11,11 +11,11 @@ jobs:
         uses: ServiceNow/servicenow-devops-change@v2.0.0
         id: create
         with:
-          devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
-          devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
+          #devops-integration-user-name: ${{ secrets.SN_DEVOPS_USER }}
+          #devops-integration-user-password: ${{ secrets.SN_DEVOPS_PASSWORD }}
           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
-          instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+          instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
+          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
           context-github: ${{ toJSON(github) }}
           job-name: 'Prepare-UAT-Deployment'
           change-request: '{"setCloseCode":"true","attributes":{"short_description":"Automated Software Deployment","assignment_group":"a715cd759f2002002920bde8132e7018","description":"Automated Software Deployment.","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
@@ -34,8 +34,8 @@ jobs:
          id: get
          with:
            devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
-           instance-url: ${{ secrets.SN_INSTANCE_URL }}
-           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
+           instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
+           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
            context-github: ${{ toJSON(github) }}
            change-details: '{"build_number":"","pipeline_name":"","stage_name":"Prepare-UAT-Deployment"}'
 
@@ -48,8 +48,8 @@ jobs:
          with:
            change-request-number: ${{ steps.get.outputs.change-request-number }}
            devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
-           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
-           instance-url: ${{ secrets.SN_INSTANCE_URL }}
+           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID_ADEVOPS2 }}
+           instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
            context-github: ${{ toJSON(github) }}
            change-request-details: '{"close_code":"successful", "close_notes":"Deployment to PROD was successful"}'
 
