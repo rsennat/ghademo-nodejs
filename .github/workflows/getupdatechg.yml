@@ -3,17 +3,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: test-echo
-    runs-on: ubuntu-latest
-    steps:
-      - name: test1
-        uses: ServiceNow/servicenow-devops-change@v2.0.0
-        with:
-          node-version: '16'
-      - name: Output of post_implementation_uat_get
-        run: echo "change-request-number = "
-
   deployment_uat:
     name: Prepare-UAT-Deployment
     runs-on: ubuntu-latest
