@@ -40,7 +40,7 @@ jobs:
       run: npm run junitxml
     
     - name: ServiceNow DevOps Unit Test Results
-      uses: ServiceNow/servicenow-devops-test-report@v1.34.2
+      uses: ServiceNow/servicenow-devops-test-report@v2.0.0
       with:
         devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
@@ -71,7 +71,7 @@ jobs:
 #      run : echo "Store Scan Tests Results in ServiceNow"
 #      
 #    - name: ServiceNow DevOps Sonar Scan Results
-#      uses: ServiceNow/servicenow-devops-sonar@v1.34.2
+#      uses: ServiceNow/servicenow-devops-sonar@v2.0.0
 #      with:
 #          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
 #          instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
@@ -92,7 +92,7 @@ jobs:
       run : echo "Register Artifact to ServiceNow"
         
     - name: ServiceNow Register Artifact
-      uses: ServiceNow/servicenow-devops-register-artifact@v1.34.2
+      uses: ServiceNow/servicenow-devops-register-artifact@v2.0.0
       with:
         devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
@@ -112,7 +112,7 @@ jobs:
       run : echo "Register Package to ServiceNow"
       
     - name: ServiceNow Register Package
-      uses: ServiceNow/servicenow-devops-register-package@v1.34.2
+      uses: ServiceNow/servicenow-devops-register-package@v2.0.0
       with:
         devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
@@ -129,7 +129,7 @@ jobs:
     needs: registerPackage
     steps:     
       - name: ServiceNow DevOps Change Attributes
-        uses: velivalab/servicenow-devops-change@depgate
+        uses: ServiceNow/servicenow-devops-change@v2.0.0
         with:
           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
           instance-url: ${{ secrets.SN_INSTANCE_URL_ADEVOPS2 }}
