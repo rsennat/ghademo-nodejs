@@ -46,7 +46,7 @@ jobs:
   change:
     name: Change Request Attributes
     runs-on: ubuntu-latest
-    needs: registerPackage
+    needs: integration
     steps:     
       - name: ServiceNow DevOps Change Attributes
         uses: ServiceNow/servicenow-devops-change@v2.0.0
