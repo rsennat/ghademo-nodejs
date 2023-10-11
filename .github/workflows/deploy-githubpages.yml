@@ -63,7 +63,7 @@ jobs:
           
   deploy-pages:
     name: Deploy to GitHub Pages
-    needs: integration
+    needs: change
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
