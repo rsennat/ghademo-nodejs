@@ -42,7 +42,7 @@ jobs:
     - name: ServiceNow DevOps Unit Test Results
       uses: ServiceNow/servicenow-devops-test-report@v2.0.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -73,7 +73,7 @@ jobs:
 #    - name: ServiceNow DevOps Sonar Scan Results
 #      uses: ServiceNow/servicenow-devops-sonar@v2.0.0
 #      with:
-#          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+#          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
 #          instance-url: ${{ secrets.SN_INSTANCE_URL }}
 #          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
 #          job-name: 'Run SonarQube'
@@ -94,7 +94,7 @@ jobs:
     - name: ServiceNow Register Artifact
       uses: ServiceNow/servicenow-devops-register-artifact@v2.0.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -114,7 +114,7 @@ jobs:
     - name: ServiceNow Register Package
       uses: ServiceNow/servicenow-devops-register-package@v2.0.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -131,7 +131,7 @@ jobs:
       - name: ServiceNow DevOps Change Attributes
         uses: ServiceNow/servicenow-devops-change@v2.0.0
         with:
-          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
+          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
