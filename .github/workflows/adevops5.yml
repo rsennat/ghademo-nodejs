@@ -142,12 +142,23 @@ jobs:
           deployment-gate: '{"environment":"deploy-gates-demo","jobName":"Deploy"}'
    
    
-  deploy:
-    name: 'Deploy'
+  deploy-pages:
+    name: Deploy to GitHub Pages
     needs: change
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    environment: deploy-gates-demo
     steps:
-      - name: Run deployment scripts
-        run: echo Completed Deployment. 
-      
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload the source folder
+          path: "./src"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
