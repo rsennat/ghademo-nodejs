@@ -1,10 +1,23 @@
-name: dep_gates
-
+name: dep_gates_adevops5
 
 on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+  
 env:
   NODE_VERSION: '16.x'
   GITHUB_TOKEN: ${{ secrets.GHP_TOKEN }}
@@ -12,7 +25,6 @@ env:
   # SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
   # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
   # SONAR_ORG_KEY: ${{ secrets.SONAR_ORG_KEY }}
-
 
 jobs:
   build:
