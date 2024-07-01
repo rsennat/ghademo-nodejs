@@ -95,7 +95,7 @@ jobs:
   registerArtifact:
     name: 'Register Artifact'
     runs-on: ubuntu-latest
-    needs: build
+    needs: runSonarQube
     steps:
     - name: Register Artifact
       shell: bash
