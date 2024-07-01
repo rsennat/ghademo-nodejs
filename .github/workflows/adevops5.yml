@@ -54,7 +54,7 @@ jobs:
     - name: ServiceNow DevOps Unit Test Results
       uses: ServiceNow/servicenow-devops-test-report@v3.1.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -85,7 +85,7 @@ jobs:
 #    - name: ServiceNow DevOps Sonar Scan Results
 #      uses: ServiceNow/servicenow-devops-sonar@v4.0.0
 #      with:
-#          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
+#          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
 #          instance-url: ${{ secrets.SN_INSTANCE_URL }}
 #          tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
 #          job-name: 'Run SonarQube'
@@ -106,7 +106,7 @@ jobs:
     - name: ServiceNow Register Artifact
       uses: ServiceNow/servicenow-devops-register-artifact@v3.1.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -126,7 +126,7 @@ jobs:
     - name: ServiceNow Register Package
       uses: ServiceNow/servicenow-devops-register-package@v3.1.0
       with:
-        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
+        devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
         instance-url: ${{ secrets.SN_INSTANCE_URL }}
         tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
         context-github: ${{ toJSON(github) }}
@@ -143,7 +143,7 @@ jobs:
       - name: ServiceNow DevOps Change Attributes
         uses: ServiceNow/servicenow-devops-change@v4.0.0
         with:
-          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN5 }}
+          devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
@@ -151,26 +151,34 @@ jobs:
           change-request: '{"setCloseCode":"true","attributes":{"short_description":"Automated Software Deployment","description":"Automated Software Deployment.","assignment_group":"a715cd759f2002002920bde8132e7018","implementation_plan":"Software update is tested and results can be found in Test Summaries Tab; When the change is approved the implementation happens automated by the CICD pipeline within the change planned start and end time window.","backout_plan":"When software fails in production, the previous software release will be re-deployed.","test_plan":"Testing if the software was successfully deployed"}}'
           interval: '100'
           timeout: '3600'
-          deployment-gate: '{"environment":"github-pages","jobName":"Deploy"}'
-   
-   
-  deploy-pages:
-    name: Deploy to GitHub Pages
+          deployment-gate: '{"environment":"prod","jobName":"Deploy"}'
+          
+  deploy:
+    name: 'Deploy'
     needs: change
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    environment: prod
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload the source folder
-          path: "./src"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+      - name: Run deployment scripts
+        run: echo Completed Deployment. 
+        
+#  deploy-pages:
+#    name: Deploy to GitHub Pages
+#    needs: change
+#    environment:
+#      name: github-pages
+#      url: ${{ steps.deployment.outputs.page_url }}
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Setup Pages
+#        uses: actions/configure-pages@v3
+#      - name: Upload artifact
+#        uses: actions/upload-pages-artifact@v2
+#        with:
+#         # Upload the source folder
+#          path: "./src"
+#      - name: Deploy to GitHub Pages
+#        id: deployment
+#        uses: actions/deploy-pages@v2
